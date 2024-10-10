@@ -3,11 +3,13 @@ package com.withalion.uteg_test.view;
 import com.withalion.uteg_test.controller.JsonParserController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.Scanner;
 import java.util.logging.Logger;
 
+@Profile("!test")
 @Service
 public class ApplicationInterface implements CommandLineRunner {
     private final Scanner scanner;
@@ -30,7 +32,9 @@ public class ApplicationInterface implements CommandLineRunner {
                 switch (command) {
                     case "print":
                     case "findMax":
-                        jsonParserController.executeCommand(command);
+                        if (jsonParserController.executeCommand(command) == 1){
+                            throw new RuntimeException("Unknown exception during processing");
+                        }
                         break;
                     default: throw new RuntimeException("Unknown command");
                 }

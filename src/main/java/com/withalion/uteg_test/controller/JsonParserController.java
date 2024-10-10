@@ -22,16 +22,29 @@ public class JsonParserController {
      * Entry function which executes commands typed by user
      * @param command user command (print / findMax)
      */
-    public void executeCommand(String command) {
+    public int executeCommand(String command) {
         if (command.equals("print")){
-            processNode(products, 0);
+            try {
+                processNode(products, 0);
+                return 0;
+            } catch (Exception e) {
+                return 1;
+            }
+
         } else if (command.equals("findMax")){
-            findMaximum(products, new ArrayList<>());
-            printMaximum();
-            // here should be some cleanup function, however as we are loading the file only once per app start we
-            // could use this to our advantage and not traverse the JSON everytime
-            maxPath = null;
+            try {
+                findMaximum(products, new ArrayList<>());
+                System.out.println(createPrintablePath());
+                // here should be some cleanup function, however as we are loading the file only once per app start we
+                // could use this to our advantage and not traverse the JSON everytime
+                //maxPath = null;
+                return 0;
+            } catch (Exception e) {
+                return 1;
+            }
+
         }
+        return 1;
     }
 
     /**
@@ -76,28 +89,35 @@ public class JsonParserController {
             var fields = node.fields();
             while (fields.hasNext()) {
                 var jsonField = fields.next();
-                printOutput(jsonField.getKey(), depth);
+                System.out.println(createPrintableOutput(jsonField.getKey(), depth));
                 processNode(jsonField.getValue(), depth + 1);
             }
         }
     }
 
     /**
-     * Function creates the visual format specified in test1.md and prints to the output
+     * Function creates the visual format specified in test1.md and prints to the output.
+     * The function was changed to public for sake of testing
      * @param text the name of the key in the map
      * @param offset the depth of given key in JSON
      */
-    private void printOutput(String text, int offset) {
+    public String createPrintableOutput(String text, int offset) {
         if (offset == 0){
-            System.out.println(text);
+            return text;
         } else {
-            System.out.println(".".repeat(Math.max(0, (offset * 2))) + " " + text);
+            return ".".repeat(Math.max(0, (offset * 2))) + " " + text;
         }
     }
 
-    private void printMaximum(){
-        maxPath.set(maxPath.size() - 2, maxPath.get(maxPath.size() - 2) + ": "+ maxPath.getLast());
-        maxPath.removeLast();
-        System.out.println(String.join(" -> ", maxPath));
+    /**
+     * Function prints chain path to the maximum value in JSON.
+     * The function was changed to public for sake of testing
+     */
+    public String createPrintablePath(){
+        //we are doing this deep copy for the sake of reusability and testing
+        var tempList = new ArrayList<>(maxPath);
+        tempList.set(maxPath.size() - 2, maxPath.get(maxPath.size() - 2) + ": "+ maxPath.getLast());
+        tempList.removeLast();
+        return String.join(" -> ", tempList);
     }
 }
